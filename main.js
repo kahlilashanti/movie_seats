@@ -4,6 +4,8 @@ const count = document.getElementById('count');
 const total = document.getElementById('total');
 const movieSelect = document.getElementById('movie');
 
+populateUI();
+
 //add a + to it to make the string a number
 let ticketPrice = +movieSelect.value;
 // console.log(typeof ticketPrice);
@@ -13,31 +15,12 @@ let ticketPrice = +movieSelect.value;
 function setMovieData(movieIndex, moviePrice) {
     localStorage.setItem('selectedMovieIndex', movieIndex);
     localStorage.setItem('selectedMoviePrice', moviePrice);
-}
-
-
-//movie select event
-movieSelect.addEventListener('change', e => {
-    ticketPrice = +e.target.value;
-    //to get the index of the selected movie
-    // console.log(e.target.selectedIndex, e.target.value);
-    setMovieData(e.target.selectedIndex, e.target.value);
-    //we want to save the movie title and price in local storage as well
-
-    updateSelectedCount();
-});
+};
 
 //seat click event
 function updateSelectedCount() {
     const selectedSeats = document.querySelectorAll('.row .seat.selected');
     //this gives us a nodeList
-    // console.log(selectedSeats)
-    //now lets get the length
-    const selectedSeatsCount = selectedSeats.length;
-    // console.log(selectedSeatsCount)
-    count.innerText = selectedSeatsCount;
-    total.innerText = selectedSeatsCount * ticketPrice;
-
 
     // in order to save seats we need an array of indexes
     // 1. copy selected seats into an array
@@ -51,13 +34,63 @@ function updateSelectedCount() {
     // console.log(seatsIndex)
     //spread operator copies the elements of an array
 
+
     //save to local storage, which is included in the browser
     localStorage.setItem('selectedSeats', JSON.stringify(seatsIndex)); //pass in a key value pair
     //seatsIndex is an array so it has to be made a string by wrapping it in JSON.stringify()
     //select seats then go to dev tools -> application -> localstorage you'll see the array
 
+    // console.log(selectedSeats)
+    //now lets get the length
+    const selectedSeatsCount = selectedSeats.length;
+    // console.log(selectedSeatsCount)
+    count.innerText = selectedSeatsCount;
+    total.innerText = selectedSeatsCount * ticketPrice;
 
 }
+
+//get data from localStorage and populate UI
+function populateUI() {
+    //pull out the selected seats from localstorage
+    //stringify makes an array a string, parse makes a string an array
+    const selectedSeats = JSON.parse(localStorage.getItem('selectedSeats'));
+
+    // console.log(selectedSeats);
+
+    //check to see if anything in selected seats
+    if (selectedSeats !== null && selectedSeats.length > 0) {
+        //loop through all of the seats and add selected class
+        seats.forEach((seat, index) => {
+            if (selectedSeats.indexOf(index) > -1) {
+                seat.classList.add('selected');
+            }
+        });
+    }
+
+    const selectedMovieIndex = localStorage.getItem('selectedMovieIndex');
+
+    //check to make sure it's not null
+    if (selectedMovieIndex !== null) {
+        movieSelect.selectedIndex = selectedMovieIndex;
+    }
+};
+
+
+
+//movie select event
+movieSelect.addEventListener('change', e => {
+    ticketPrice = +e.target.value;
+    //to get the index of the selected movie
+    // console.log(e.target.selectedIndex, e.target.value);
+    setMovieData(e.target.selectedIndex, e.target.value);
+    //we want to save the movie title and price in local storage as well
+
+    updateSelectedCount();
+});
+
+
+
+
 
 //check if seat is occupied and only allow clicking on non-occupied seats
 container.addEventListener('click', (e) => {
@@ -73,3 +106,6 @@ container.addEventListener('click', (e) => {
 
     }
 });
+
+//initial count and total set
+updateSelectedCount();
